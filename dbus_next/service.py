@@ -95,7 +95,7 @@ def method(name: str = None, disabled: bool = False, sender_keyword: str = None)
             fn(*args, **kwargs)
 
         fn_name = name if name else fn.__name__
-        wrapped.__dict__['__DBUS_METHOD'] = _Method(fn, fn_name, disabled=disabled)
+        wrapped.__dict__['__DBUS_METHOD'] = _Method(fn, fn_name, disabled=disabled, sender_keyword=sender_keyword)
 
         return wrapped
 
