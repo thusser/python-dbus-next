@@ -12,7 +12,7 @@ import asyncio
 
 
 class _Method:
-    def __init__(self, fn, name, disabled=False):
+    def __init__(self, fn, name, disabled=False, sender_keyword=None):
         in_signature = ''
         out_signature = ''
 
@@ -44,9 +44,10 @@ class _Method:
         self.out_signature = out_signature
         self.in_signature_tree = SignatureTree._get(in_signature)
         self.out_signature_tree = SignatureTree._get(out_signature)
+        self.sender_keyword = sender_keyword
 
 
-def method(name: str = None, disabled: bool = False):
+def method(name: str = None, disabled: bool = False, sender_keyword: str = None):
     """A decorator to mark a class method of a :class:`ServiceInterface` to be a DBus service method.
 
     The parameters and return value must each be annotated with a signature
@@ -90,17 +91,10 @@ def method(name: str = None, disabled: bool = False):
         def wrapped(*args, **kwargs):
             fn(*args, **kwargs)
 
-        @wraps(fn)
-        async def async_wrapped(*args, **kwargs):
-            await fn(*args, **kwargs)
-
         fn_name = name if name else fn.__name__
-        if asyncio.iscoroutinefunction(fn):
-            async_wrapped.__dict__["__DBUS_METHOD"] = _Method(fn, fn_name, disabled=disabled)
-            return async_wrapped
-        else:
-            wrapped.__dict__["__DBUS_METHOD"] = _Method(fn, fn_name, disabled=disabled)
-            return wrapped
+        wrapped.__dict__['__DBUS_METHOD'] = _Method(fn, fn_name, disabled=disabled)
+
+        return wrapped
 
     return decorator
 
